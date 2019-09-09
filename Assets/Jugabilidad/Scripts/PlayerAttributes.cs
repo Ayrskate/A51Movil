@@ -5,8 +5,10 @@ using UnityEngine;
 public class PlayerAttributes : MonoBehaviour
 {
 
-    [HideInInspector]public int lifeHits;
-    [HideInInspector]public bool invulnerableStat;
+    public int lifeHits;
+
+    public bool invulnerableStat;
+    public int invulnerableTimer;
 
     public GameController gC;
     
@@ -15,6 +17,7 @@ public class PlayerAttributes : MonoBehaviour
     {
         lifeHits = 3;
         invulnerableStat = false;
+        invulnerableTimer = 0;
     }
 
     // Update is called once per frame
@@ -39,23 +42,36 @@ public class PlayerAttributes : MonoBehaviour
 
     private void OnTriggerEnter(Collider col)
     {
+        //Colisión con los obstaculos
         if (invulnerableStat == false)
         {
-            if (col.tag.Equals("Obstacle") && lifeHits > 0)
+            if (col.gameObject.tag.Equals("Obstacle") && lifeHits > 0)
             {
                 lifeHits--;
+                invulnerableStat = true;
+                invulnerableTimer = 3;
                 StartCoroutine("GetInvulnerable");
             }
-            else if (col.tag.Equals("Obstacle") && lifeHits <= 0)
+            else if (col.gameObject.tag.Equals("Obstacle") && lifeHits <= 0)
+            {
+                if (gC.gameStatus == true)
+                    gC.GameOverEvent();
                 Debug.Log("Gameover"); //Crear metodos para el gameover
+            }
+                
         }
               
     }
 
-    IEnumerator GetInVulnerable()
+    IEnumerator GetInvulnerable()
     {
-        invulnerableStat = true;
-        yield return new WaitForSeconds(3f);
+        for(int i = 0; i < invulnerableTimer; i++)
+        {
+            yield return new WaitForSeconds(1f);
+        }
+
+        invulnerableTimer = 0;
         invulnerableStat = false;
+        Debug.Log("Terminó invencibilidad");
     }
 }
